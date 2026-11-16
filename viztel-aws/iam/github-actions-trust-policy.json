@@ -10,7 +10,7 @@
       "Condition": {
         "StringEquals": {
           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-          "token.actions.githubusercontent.com:sub": "repo:ingleprayagraj7713-gif/host-broandband-isp-site-using-ecs-:ref:refs/heads/main"
+          "token.actions.githubusercontent.com:sub": "repo:ingleprayagraj7713-gif@355088530/host-broandband-isp-site-using-ecs-@1459754575:ref:refs/heads/main"
         }
       }
     }
