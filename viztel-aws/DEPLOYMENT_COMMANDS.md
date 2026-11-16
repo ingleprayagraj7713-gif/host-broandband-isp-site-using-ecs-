@@ -19,3 +19,7 @@ The TEST environment does not currently have an RDS database. The API runs
 without a database in its demo mode; database-backed persistence is not
 available. Do not put real customer data or production credentials in this
 environment until a database and real Secrets Manager values are configured.
+
+For automated TEST deployments on pushes to `main`, see
+[`aws-cli/README.md`](./aws-cli/README.md#github-actions) for the GitHub Actions
+OIDC setup requirements.

@@ -1,0 +1,77 @@
+name: Test and deploy to AWS ECS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "viztel-app/**"
+      - "viztel-aws/**"
+      - ".github/workflows/deploy-aws.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: viztel-test-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            viztel-app/backend/package-lock.json
+            viztel-app/frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci --prefix viztel-app/backend
+
+      - name: Check backend syntax
+        run: node --check viztel-app/backend/server.js
+
+      - name: Install frontend dependencies
+        run: npm ci --prefix viztel-app/frontend
+
+      - name: Build frontend
+        run: npm run build --prefix viztel-app/frontend
+
+  deploy-test:
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check deployment role configuration
+        run: |
+          if [[ -z "$AWS_ROLE_ARN" ]]; then
+            echo "::error::Set the AWS_ROLE_ARN repository variable to an IAM role trusted by GitHub OIDC."
+            exit 1
+          fi
+
+      - name: Configure AWS credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-${{ github.run_id }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Deploy test environment
+        run: bash viztel-aws/aws-cli/deploy-test-ci.sh

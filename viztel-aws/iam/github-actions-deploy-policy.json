@@ -1,0 +1,75 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:GetCallerIdentity",
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:GetAuthorizationToken",
+        "ecr:DescribeRepositories"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:CompleteLayerUpload",
+        "ecr:InitiateLayerUpload",
+        "ecr:PutImage",
+        "ecr:UploadLayerPart"
+      ],
+      "Resource": [
+        "arn:aws:ecr:<AWS_REGION>:<AWS_ACCOUNT_ID>:repository/viztel-frontend",
+        "arn:aws:ecr:<AWS_REGION>:<AWS_ACCOUNT_ID>:repository/viztel-backend"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecs:DescribeClusters",
+        "ecs:DescribeServices"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "ecs:RegisterTaskDefinition",
+      "Resource": [
+        "arn:aws:ecs:<AWS_REGION>:<AWS_ACCOUNT_ID>:task-definition/viztel-frontend-task:*",
+        "arn:aws:ecs:<AWS_REGION>:<AWS_ACCOUNT_ID>:task-definition/viztel-backend-task:*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "ecs:UpdateService",
+      "Resource": [
+        "arn:aws:ecs:<AWS_REGION>:<AWS_ACCOUNT_ID>:cluster/viztel-test-cluster",
+        "arn:aws:ecs:<AWS_REGION>:<AWS_ACCOUNT_ID>:service/viztel-test-cluster/viztel-frontend",
+        "arn:aws:ecs:<AWS_REGION>:<AWS_ACCOUNT_ID>:service/viztel-test-cluster/viztel-backend"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "ecs-tasks.amazonaws.com"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": "elasticloadbalancing:DescribeTargetHealth",
+      "Resource": [
+        "arn:aws:elasticloadbalancing:<AWS_REGION>:<AWS_ACCOUNT_ID>:targetgroup/viztel-frontend-tg/*",
+        "arn:aws:elasticloadbalancing:<AWS_REGION>:<AWS_ACCOUNT_ID>:targetgroup/viztel-backend-tg/*"
+      ]
+    }
+  ]
+}

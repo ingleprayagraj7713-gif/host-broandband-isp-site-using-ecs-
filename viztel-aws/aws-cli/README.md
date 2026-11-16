@@ -26,3 +26,31 @@ The script does not create or modify a database or Secrets Manager values. The
 backend therefore starts in its built-in demo mode, with no persistent database
 connection. Configure a real database and credentials before relying on
 persistent customer data or using this environment beyond testing.
+
+## GitHub Actions
+
+`.github/workflows/deploy-aws.yml` validates the backend and builds the
+frontend, then deploys to the existing TEST ECS services when code is pushed
+to `main`. It can also be started manually from the Actions tab. ECR images are
+tagged with the triggering commit SHA. The workflow uses
+`deploy-test-ci.sh`, which only updates ECR images and ECS task definitions and
+services; it does not create or modify network infrastructure.
+
+Configure GitHub repository variables:
+
+- `AWS_ROLE_ARN`: ARN of a role trusted by GitHub's OIDC provider.
+- `AWS_REGION`: optional; defaults to `us-east-1`.
+
+Create the AWS IAM OIDC provider for `https://token.actions.githubusercontent.com`
+if it does not already exist. Use
+[`../iam/github-actions-trust-policy.json`](../iam/github-actions-trust-policy.json)
+as the role trust policy, replacing `<AWS_ACCOUNT_ID>`. Attach
+[`../iam/github-actions-deploy-policy.json`](../iam/github-actions-deploy-policy.json)
+after replacing `<AWS_ACCOUNT_ID>` and `<AWS_REGION>`. The policy is scoped to
+the two ECR repositories, task families, ECS services, target groups, and
+`ecsTaskExecutionRole` used by this TEST deployment.
+
+The workflow expects the existing ECR repositories, `viztel-test-cluster`,
+ECS services, ALB target groups, and `ecsTaskExecutionRole`. Use
+`deploy-test.sh` for initial infrastructure provisioning. The OIDC trust
+policy limits role assumption to this repository's `main` branch.
