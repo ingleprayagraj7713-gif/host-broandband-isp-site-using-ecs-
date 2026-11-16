@@ -1,0 +1,43 @@
+{
+  "family": "viztel-backend-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/viztel-ecs-task-role",
+  "containerDefinitions": [
+    {
+      "name": "viztel-backend",
+      "image": "<ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/viztel-backend:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 5000,
+          "hostPort": 5000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        { "name": "PORT", "value": "5000" },
+        { "name": "NODE_ENV", "value": "test" },
+        { "name": "DB_HOST", "value": "viztel-test-db.xxxxxxxxxx.us-east-1.rds.amazonaws.com" }
+      ],
+      "secrets": [
+        { "name": "DB_USER", "valueFrom": "arn:aws:secretsmanager:us-east-1:<ACCOUNT_ID>:secret:viztel-test-secrets:DB_USER::" },
+        { "name": "DB_PASSWORD", "valueFrom": "arn:aws:secretsmanager:us-east-1:<ACCOUNT_ID>:secret:viztel-test-secrets:DB_PASSWORD::" },
+        { "name": "JWT_SECRET", "valueFrom": "arn:aws:secretsmanager:us-east-1:<ACCOUNT_ID>:secret:viztel-test-secrets:JWT_SECRET::" },
+        { "name": "RAZORPAY_KEY", "valueFrom": "arn:aws:secretsmanager:us-east-1:<ACCOUNT_ID>:secret:viztel-test-secrets:RAZORPAY_KEY::" },
+        { "name": "RAZORPAY_SECRET", "valueFrom": "arn:aws:secretsmanager:us-east-1:<ACCOUNT_ID>:secret:viztel-test-secrets:RAZORPAY_SECRET::" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/viztel-backend",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
