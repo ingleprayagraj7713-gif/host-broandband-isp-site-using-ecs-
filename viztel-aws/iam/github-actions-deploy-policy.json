@@ -69,10 +69,7 @@
     {
       "Effect": "Allow",
       "Action": "elasticloadbalancing:DescribeTargetHealth",
-      "Resource": [
-        "arn:aws:elasticloadbalancing:<AWS_REGION>:<AWS_ACCOUNT_ID>:targetgroup/viztel-frontend-tg/*",
-        "arn:aws:elasticloadbalancing:<AWS_REGION>:<AWS_ACCOUNT_ID>:targetgroup/viztel-backend-tg/*"
-      ]
+      "Resource": "*"
     }
   ]
 }
